@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>元素週期表練習</title>
+    <style>
+        body {
+            font-family: 'PingFang TC', 'Microsoft JhengHei', Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #2c3e50;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .header-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h1 {
+            margin: 5px 0;
+            color: #1e3a8a;
+        }
+        .mode-selector {
+            background: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .mode-btn {
+            padding: 10px 20px;
+            font-size: 15px;
+            font-weight: bold;
+            border: 2px solid #3b82f6;
+            background: white;
+            color: #3b82f6;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .mode-btn.active {
+            background: #3b82f6;
+            color: white;
+        }
+        .timer-box {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ef4444;
+            background: #fee2e2;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid #fca5a5;
+            min-width: 130px;
+            text-align: center;
+        }
+        .submit-btn {
+            padding: 10px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+        }
+        .submit-btn:hover { background: #059669; }
+        
+        .periodic-table-container {
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+        }
+        .periodic-table {
+            display: grid;
+            grid-template-columns: repeat(18, 62px);
+            grid-gap: 4px;
+        }
+        .cell {
+            width: 62px;
+            height: 72px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 3px;
+            box-sizing: border-box;
+            background-color: #fff;
+        }
+        .cell .atomic-number {
+            font-size: 10px;
+            color: #64748b;
+            align-self: flex-start;
+            font-weight: bold;
+            line-height: 1;
+        }
+        .cell .symbol-text, .cell .name-text {
+            text-align: center;
+            width: 100%;
+        }
+        .cell .symbol-text {
+            font-size: 16px;
+            font-weight: bold;
+            color: #1e293b;
+        }
+        .cell .name-text {
+            font-size: 12px;
+            color: #334155;
+            font-weight: 500;
+        }
+        
+        /* Quiz Input Box */
+        .quiz-input {
+            width: 90%;
+            height: 24px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: bold;
+            border: none;
+            border-bottom: 2px solid #94a3b8;
+            outline: none;
+            background: transparent;
+            padding: 0;
+        }
+        .quiz-input:focus {
+            border-bottom-color: #3b82f6;
+        }
+        
+        .empty { visibility: hidden; }
+        
+        /* Preset Group Background Colors from image grid */
+        .bg-preset { background-color: #ffffff; }
+        .bg-transition { background-color: #f0fdf4; border-color: #bbf7d0; } /* Group 3-12 Sc-Zn area color */
+        .bg-lanth-marker { background-color: #16a34a; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; }
+        .bg-actin-marker { background-color: #1e293b; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; }
+        
+        .f-block-wrapper {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding-left: 132px;
+        }
+        .f-row {
+            display: flex;
+            gap: 4px;
+        }
+        .f-label {
+            width: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            font-weight: bold;
+            font-size: 13px;
+            color: #475569;
+            margin-right: 12px;
+        }
+
+        /* Target exact grid constraints */
+        .correct-bg {
+            background-color: #22c55e !important; /* Green background requested */
+            border-color: #16a34a !important;
+        }
+        .correct-bg * {
+            color: white !important;
+        }
+        .wrong-bg {
+            background-color: #fee2e2 !important;
+            border-color: #f87171 !important;
+        }
+        
+        /* Error text same size as requested */
+        .wrong-correct-ans {
+            font-size: 15px; 
+            font-weight: bold;
+            color: #dc2626;
+            text-align: center;
+            width: 100%;
+        }
+
+        #result-panel {
+            margin-top: 25px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            width: 450px;
+            text-align: center;
+            display: none;
+            border: 2px solid #10b981;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-section">
+        <h1>元素週期表記憶填空測驗</h1>
+    </div>
+
+    <div class="mode-selector">
+        <span>請選擇測驗模式：</span>
+        <button id="btn-cte" class="mode-btn active" onclick="switchMode('CTE')">中翻英 (15分鐘)</button>
+        <button id="btn-etc" class="mode-btn" onclick="switchMode('ETC')">英翻中 (25分鐘)</button>
+        <div class="timer-box" id="timer-display">15:00</div>
+        <button class="submit-btn" onclick="submitQuiz()">提交答案</button>
+    </div>
+
+    <div class="periodic-table-container">
+        <div class="periodic-table" id="main-grid">
+            <!-- Dynamically populated via JS -->
+        </div>
+
+        <div class="f-block-wrapper">
+            <div class="f-row" id="lanth-row">
+                <div class="f-label" style="margin-left: -132px;">鑭系元素</div>
+                <!-- Dynamically populated -->
+            </div>
+            <div class="f-row" id="actin-row" style="margin-top: 4px;">
+                <div class="f-label" style="margin-left: -132px;">錒系元素</div>
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <div id="result-panel">
+        <h2 style="color: #10b981; margin-top:0;">🎉 測驗完成報告</h2>
+        <div style="font-size: 24px; font-weight: bold; margin: 15px 0;" id="score-text">0 / 0 題</div>
+        <div style="text-align: left; font-size: 14px; line-height: 1.8; color: #475569;">
+            • 正確題數：<span id="res-correct">0</span> 題<br>
+            • 答錯題數：<span id="res-wrong">0</span> 題<br>
+            • 測驗總得分：<span id="res-score">0</span> 分<br>
+            • 作答總耗時：<span id="res-time" style="color:#f59e0b; font-weight:bold;">0分0秒</span>
+        </div>
+    </div>
+
+    <script>
+        // Database from the uploaded periodic table image layout
+        const elementsData = {
+            1: { s: "H", n: "氫", b: true },
+            2: { s: "He", n: "氦", b: true },
+            3: { s: "Li", n: "鋰", b: true },
+            4: { s: "Be", n: "鈹", b: true },
+            5: { s: "B", n: "硼", b: true },
+            6: { s: "C", n: "碳", b: true },
+            7: { s: "N", n: "氮", b: true },
+            8: { s: "O", n: "氧", b: true },
+            9: { s: "F", n: "氟", b: true },
+            10: { s: "Ne", n: "氖", b: true },
+            11: { s: "Na", n: "鈉", b: true },
+            12: { s: "Mg", n: "鎂", b: true },
+            13: { s: "Al", n: "鋁", b: true },
+            14: { s: "Si", n: "矽", b: true },
+            15: { s: "P", n: "磷", b: true },
+            16: { s: "S", n: "硫", b: true },
+            17: { s: "Cl", n: "氯", b: true },
+            18: { s: "Ar", n: "氬", b: true },
+            19: { s: "K", n: "鉀", b: true },
+            20: { s: "Ca", n: "鈣", b: true },
+            21: { s: "Sc", n: "鈧", b: false },
+            22: { s: "Ti", n: "鈦", b: false },
+            23: { s: "V", n: "釩", b: false },
+            24: { s: "Cr", n: "鉻", b: true },
+            25: { s: "Mn", n: "錳", b: true },
+            26: { s: "Fe", n: "鐵", b: true },
+            27: { s: "Co", n: "鈷", b: true },
+            28: { s: "Ni", n: "鎳", b: true },
+            29: { s: "Cu", n: "銅", b: true },
+            30: { s: "Zn", n: "鋅", b: true },
+            31: { s: "Ga", n: "鎵", b: true },
+            32: { s: "Ge", n: "鍺", b: true },
+            33: { s: "As", n: "砷", b: true },
+            34: { s: "Se", n: "硒", b: false },
+            35: { s: "Br", n: "溴", b: true },
+            36: { s: "Kr", n: "氪", b: true },
+            37: { s: "Rb", n: "銣", b: false },
+            38: { s: "Sr", n: "鍶", b: true },
+            39: { s: "Y", n: "釔", b: false },
+            40: { s: "Zr", n: "鋯", b: false },
+            41: { s: "Nb", n: "鈮", b: false },
+            42: { s: "Mo", n: "鉬", b: false },
+            43: { s: "Tc", n: "鎝", b: false },
+            44: { s: "Ru", n: "釕", b: false },
+            45: { s: "Rh", n: "銠", b: false },
+            46: { s: "Pd", n: "鈀", b: true },
+            47: { s: "Ag", n: "銀", b: true },
+            48: { s: "Cd", n: "鎘", b: true },
+            49: { s: "In", n: "銦", b: false },
+            50: { s: "Sn", n: "錫", b: true },
+            51: { s: "Sb", n: "銻", b: false },
+            52: { s: "Te", n: "碲", b: false },
+            53: { s: "I", n: "碘", b: true },
+            54: { s: "Xe", n: "氙", b: true },
+            55: { s: "Cs", n: "銫", b: false },
+            56: { s: "Ba", n: "鋇", b: true },
+            72: { s: "Hf", n: "鉿", b: false },
+            73: { s: "Ta", n: "鉭", b: false },
+            74: { s: "W", n: "鎢", b: true },
+            75: { s: "Re", n: "錸", b: false },
+            76: { s: "Os", n: "鋨", b: false },
+            77: { s: "Ir", n: "銥", b: false },
+            78: { s: "Pt", n: "鉑", b: true },
+            79: { s: "Au", n: "金", b: true },
+            80: { s: "Hg", n: "汞", b: true },
+            81: { s: "Tl", n: "鉈", b: false },
+            82: { s: "Pb", n: "鉛", b: true },
+            83: { s: "Bi", n: "鉍", b: false },
+            84: { s: "Po", n: "釙", b: false },
+            85: { s: "At", n: "砈", b: false },
+            86: { s: "Rn", n: "氡", b: false },
+            87: { s: "Fr", n: "鍅", b: false },
+            88: { s: "Ra", n: "鐳", b: false },
+            104: { s: "Rf", n: "鑪", b: false },
+            105: { s: "Db", n: "𨧀", b: false },
+            106: { s: "Sg", n: "𨭎", b: false },
+            107: { s: "Bh", n: "𨨏", b: false },
+            108: { s: "Hs", n: "𨭆", b: false },
+            109: { s: "Mt", n: "䥑", b: false },
+            110: { s: "Ds", n: "鐽", b: false },
+            111: { s: "Rg", n: "錀", b: false },
+            112: { s: "Cn", n: "鎶", b: false },
+            113: { s: "Nh", n: "鉨", b: false },
+            114: { s: "Fl", n: "鈇", b: false },
+            115: { s: "Mc", n: "鏌", b: false },
+            116: { s: "Lv", n: "鉝", b: false },
+            117: { s: "Ts", n: "鿬", b: false },
+            118: { s: "Og", n: "鿫", b: false }
+        };
+
+        const lanthData = [
+            {id: 57, s:"La", n:"鑭"}, {id: 58, s:"Ce", n:"鈰"}, {id: 59, s:"Pr", n:"鐠"}, {id: 60, s:"Nd", n:"釹"},
+            {id: 61, s:"Pm", n:"鉕"}, {id: 62, s:"Sm", n:"釤"}, {id: 63, s:"Eu", n:"銪"}, {id: 64, s:"Gd", n:"釓"},
+            {id: 65, s:"Tb", n:"鋱"}, {id: 66, s:"Dy", n:"鏑"}, {id: 67, s:"Ho", n:"鈥"}, {id: 68, s:"Er", n:"鉺"},
+            {id: 69, s:"Tm", n:"銩"}, {id: 70, s:"Yb", n:"鐿"}, {id: 71, s:"Lu", n:"鑥"}
+        ];
+
+        const actinData = [
+            {id: 89, s:"Ac", n:"錒"}, {id: 90, s:"Th", n:"釷"}, {id: 91, s:"Pa", n:"鏷"}, {id: 92, s:"U", n:"鈾"},
+            {id: 93, s:"Np", n:"錼"}, {id: 94, s:"Pu", n:"鈽"}, {id: 95, s:"Am", n:"鋂"}, {id: 96, s:"Cm", n:"鋦"},
+            {id: 97, s:"Bk", n:"鉳"}, {id: 98, s:"Cf", n:"鉲"}, {id: 99, s:"Es", n:"鑀"}, {id: 100, s:"Fm", n:"鐨"},
+            {id: 101, s:"Md", n:"鍆"}, {id: 102, s:"No", n:"鍩"}, {id: 103, s:"Lr", n:"鐒"}
+        ];
+
+        let currentMode = 'CTE'; // CTE = 中翻英, ETC = 英翻中
+        let timeRemaining = 900; // 15 mins default
+        let timeElapsed = 0;
+        let timerId = null;
+        let isSubmitted = false;
+
+        function buildMatrix() {
+            const grid = document.getElementById("main-grid");
+            grid.innerHTML = "";
+            
+            // Generate full table structure row by row
+            for(let r=1; r<=7; r++) {
+                for(let c=1; c<=18; c++) {
+                    let id = 0;
+                    if(r===1) {
+                        if(c===1) id = 1;
+                        else if(c===18) id = 2;
+                    } else if(r===2) {
+                        if(c<=2) id = c + 2;
+                        else if(c>=13) id = c - 8;
+                    } else if(r===3) {
+                        if(c<=2) id = c + 10;
+                        else if(c>=13) id = c;
+                    } else if(r===4) {
+                        id = c + 18;
+                    } else if(r===5) {
+                        id = c + 36;
+                    } else if(r===6) {
+                        if(c<=2) id = c + 54;
+                        else if(c===3) id = "LANTH";
+                        else id = c + 68;
+                    } else if(r===7) {
+                        if(c<=2) id = c + 86;
+                        else if(c===3) id = "ACTIN";
+                        else id = c + 100;
+                    }
+
+                    if(id === 0) {
+                        grid.innerHTML += `<div class="empty"></div>`;
+                    } else if(id === "LANTH") {
+                        grid.innerHTML += `<div class="cell bg-lanth-marker"><div style="text-align:center;line-height:1.2;">57<br>-<br>71</div></div>`;
+                    } else if(id === "ACTIN") {
+                        grid.innerHTML += `<div class="cell bg-actin-marker"><div style="text-align:center;line-height:1.2;">89<br>-<br>103</div></div>`;
+                    } else {
+                        grid.appendChild(createCellNode(id, elementsData[id]));
+                    }
+                }
+            }
+
+            // Build Lanthanides & Actinides (Non-interactive presets)
+            const lRow = document.getElementById("lanth-row");
+            // Clear but keep first child label
+            lRow.querySelectorAll('.cell').forEach(e => e.remove());
+            lanthData.forEach(item => {
+                lRow.appendChild(createStaticCell(item.id, item.s, item.n, "bg-transition"));
+            });
+
+            const aRow = document.getElementById("actin-row");
+            aRow.querySelectorAll('.cell').forEach(e => e.remove());
+            actinData.forEach(item => {
+                aRow.appendChild(createStaticCell(item.id, item.s, item.n, "bg-preset"));
+            });
+        }
+
+        function createStaticCell(id, symbol, name, bgClass) {
+            let div = document.createElement("div");
+            div.className = `cell ${bgClass}`;
+            div.innerHTML = `<span class="atomic-number">${id}</span><span class="symbol-text">${symbol}</span><span class="name-text">${name}</span>`;
+            return div;
+        }
+
+        function createCellNode(id, data) {
+            let div = document.createElement("div");
+            // Setup specific background styles matching transition metal block
+            let isTransition = (id>=21 && id<=30) || (id>=39 && id<=48) || (id>=72 && id<=80) || (id>=104 && id<=118);
+            div.className = `cell ${isTransition ? 'bg-transition' : 'bg-preset'}`;
+            div.id = `block-${id}`;
+
+            let html = `<span class="atomic-number">${id}</span>`;
+            
+            if(data.b) {
+                // Interactive quiz blank
+                if(currentMode === 'CTE') {
+                    // Give Chinese name, ask for English symbol
+                    html += `<input type="text" class="quiz-input" id="ans-${id}" data-correct="${data.s}">`;
+                    html += `<span class="name-text" id="label-${id}">${data.n}</span>`;
+                } else {
+                    // Give English symbol, ask for Chinese name
+                    html += `<span class="symbol-text" id="label-${id}">${data.s}</span>`;
+                    html += `<input type="text" class="quiz-input" id="ans-${id}" data-correct="${data.n}">`;
+                }
+            } else {
+                // Static non-quiz element preset from chart
+                html += `<span class="symbol-text">${data.s}</span>`;
+                html += `<span class="name-text">${data.n}</span>`;
+            }
+            div.innerHTML = html;
+            return div;
+        }
+
+        function switchMode(mode) {
+            if(isSubmitted && !confirm("切換模式將會重設目前的所有填答，確定要切換嗎？")) return;
+            currentMode = mode;
+            isSubmitted = false;
+            timeElapsed = 0;
+            document.getElementById("result-panel").style.display = "none";
+            
+            if(mode === 'CTE') {
+                document.getElementById("btn-cte").className = "mode-btn active";
+                document.getElementById("btn-etc").className = "mode-btn";
+                timeRemaining = 15 * 60;
+            } else {
+                document.getElementById("btn-cte").className = "mode-btn";
+                document.getElementById("btn-etc").className = "mode-btn active";
+                timeRemaining = 25 * 60;
+            }
+            
+            buildMatrix();
+            updateTimerDisplay();
+            clearInterval(timerId);
+            startTimer();
+        }
+
+        function updateTimerDisplay() {
+            let m = Math.floor(timeRemaining / 60);
+            let s = timeRemaining % 60;
+            document.getElementById("timer-display").innerText = `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        function startTimer() {
+            timerId = setInterval(() => {
+                if(timeRemaining <= 0) {
+                    clearInterval(timerId);
+                    alert("測驗時間截止！系統將自動為您提交試卷。");
+                    submitQuiz();
+                    return;
+                }
+                timeRemaining--;
+                timeElapsed++;
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        function submitQuiz() {
+            if(isSubmitted) return;
+            isSubmitted = true;
+            clearInterval(timerId);
+
+            let inputs = document.querySelectorAll(".quiz-input");
+            let correctCount = 0;
+            let totalCount = inputs.length;
+
+            inputs.forEach(input => {
+                input.disabled = true;
+                let userVal = input.value.trim();
+                let correctVal = input.getAttribute("data-correct");
+                let id = input.id.replace("ans-", "");
+                let block = document.getElementById(`block-${id}`);
+                let label = document.getElementById(`label-${id}`);
+
+                // Case insensitive check for text to be user friendly, but strict match on symbol can be done
+                let isCorrect = false;
+                if(currentMode === 'CTE') {
+                    // Check English Symbol case insensitively or strictly? Chemical symbols usually case sensitive. Let's do case insensitive for user convenience but show exact case on error.
+                    isCorrect = userVal.toLowerCase() === correctVal.toLowerCase();
+                } else {
+                    isCorrect = userVal === correctVal;
+                }
+
+                if(isCorrect) {
+                    correctCount++;
+                    block.className = "cell correct-bg";
+                    // Display correct format beautifully
+                    block.innerHTML = `
+                        <span class="atomic-number">${id}</span>
+                        <span class="symbol-text" style="color:white; font-size:16px;">${elementsData[id].s}</span>
+                        <span class="name-text" style="color:white; font-size:12px;">${elementsData[id].n}</span>
+                    `;
+                } else {
+                    block.className = "cell wrong-bg";
+                    // Render the original prompt element and then add the correct value below it matching the exact font specifications requested
+                    input.style.display = "none";
+                    if(label) label.style.display = "none";
+                    
+                    if(currentMode === 'CTE') {
+                        block.innerHTML = `
+                            <span class="atomic-number">${id}</span>
+                            <span class="wrong-correct-ans">${correctVal}</span>
+                            <span class="name-text" style="color:#64748b; font-size:11px;">${elementsData[id].n}</span>
+                        `;
+                    } else {
+                        block.innerHTML = `
+                            <span class="atomic-number">${id}</span>
+                            <span class="symbol-text" style="color:#64748b; font-size:13px;">${elementsData[id].s}</span>
+                            <span class="wrong-correct-ans">${correctVal}</span>
+                        `;
+                    }
+                }
+            });
+
+            // Display report
+            document.getElementById("res-correct").innerText = correctCount;
+            document.getElementById("res-wrong").innerText = totalCount - correctCount;
+            document.getElementById("score-text").innerText = `${correctCount} / ${totalCount} 題`;
+            document.getElementById("res-score").innerText = Math.round((correctCount / totalCount) * 100);
+            
+            let em = Math.floor(timeElapsed / 60);
+            let es = timeElapsed % 60;
+            document.getElementById("res-time").innerText = `${em} 分 ${es} 秒`;
+            document.getElementById("result-panel").style.display = "block";
+            
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+
+        // Initialize setup
+        window.onload = () => {
+            buildMatrix();
+            startTimer();
+        };
+    </script>
+</body>
+</html>
