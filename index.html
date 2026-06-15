@@ -71,11 +71,22 @@
         }
         .submit-btn:hover { background: #059669; }
         
+        /* === ✨ 新增與優化的 RWD 滑動外殼 CSS === */
+        .table-scroll-wrapper {
+            max-width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch; /* 讓 iOS 手機滑動更流暢 */
+            padding-bottom: 15px; /* 預留空間給手機滾動條 */
+            margin-bottom: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+        }
+        
         .periodic-table-container {
             background: #fff;
             padding: 25px;
             border-radius: 12px;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            min-width: max-content; /* 確保在小螢幕上不會擠壓內部的 Grid */
         }
         .periodic-table {
             display: grid;
@@ -214,19 +225,18 @@
         <button class="submit-btn" onclick="submitQuiz()">提交答案</button>
     </div>
 
-    <div class="periodic-table-container">
-        <div class="periodic-table" id="main-grid">
-            <!-- Dynamically populated via JS -->
-        </div>
+    <div class="table-scroll-wrapper">
+        <div class="periodic-table-container">
+            <div class="periodic-table" id="main-grid">
+                </div>
 
-        <div class="f-block-wrapper">
-            <div class="f-row" id="lanth-row">
-                <div class="f-label" style="margin-left: -132px;">鑭系元素</div>
-                <!-- Dynamically populated -->
-            </div>
-            <div class="f-row" id="actin-row" style="margin-top: 4px;">
-                <div class="f-label" style="margin-left: -132px;">錒系元素</div>
-                <!-- Dynamically populated -->
+            <div class="f-block-wrapper">
+                <div class="f-row" id="lanth-row">
+                    <div class="f-label" style="margin-left: -132px;">鑭系元素</div>
+                    </div>
+                <div class="f-row" id="actin-row" style="margin-top: 4px;">
+                    <div class="f-label" style="margin-left: -132px;">錒系元素</div>
+                    </div>
             </div>
         </div>
     </div>
@@ -282,7 +292,7 @@
             35: { s: "Br", n: "溴", b: true },
             36: { s: "Kr", n: "氪", b: true },
             37: { s: "Rb", n: "銣", b: false },
-            38: { s: "Sr", n: "鍶", b: true },
+            38: { s: "Sr", n: "", b: true },
             39: { s: "Y", n: "釔", b: false },
             40: { s: "Zr", n: "鋯", b: false },
             41: { s: "Nb", n: "鈮", b: false },
@@ -305,7 +315,7 @@
             73: { s: "Ta", n: "鉭", b: false },
             74: { s: "W", n: "鎢", b: true },
             75: { s: "Re", n: "錸", b: false },
-            76: { s: "Os", n: "鋨", b: false },
+            76: { s: "Os", n: "", b: false },
             77: { s: "Ir", n: "銥", b: false },
             78: { s: "Pt", n: "鉑", b: true },
             79: { s: "Au", n: "金", b: true },
@@ -337,8 +347,8 @@
 
         const lanthData = [
             {id: 57, s:"La", n:"鑭"}, {id: 58, s:"Ce", n:"鈰"}, {id: 59, s:"Pr", n:"鐠"}, {id: 60, s:"Nd", n:"釹"},
-            {id: 61, s:"Pm", n:"鉕"}, {id: 62, s:"Sm", n:"釤"}, {id: 63, s:"Eu", n:"銪"}, {id: 64, s:"Gd", n:"釓"},
-            {id: 65, s:"Tb", n:"鋱"}, {id: 66, s:"Dy", n:"鏑"}, {id: 67, s:"Ho", n:"鈥"}, {id: 68, s:"Er", n:"鉺"},
+            {id: 61, s:"Pm", n:"鉕"}, {id: 62, s:"Sm", n:""}, {id: 63, s:"Eu", n:"銪"}, {id: 64, s:"Gd", n:"釓"},
+            {id: 65, s:"Tb", n:"鋱"}, {id: 66, s:"Dy", n:"鏑"}, {id: 67, s:"Ho", n:"\u25cc"}, {id: 68, s:"Er", n:"鉺"},
             {id: 69, s:"Tm", n:"銩"}, {id: 70, s:"Yb", n:"鐿"}, {id: 71, s:"Lu", n:"鑥"}
         ];
 
@@ -512,7 +522,6 @@
                 // Case insensitive check for text to be user friendly, but strict match on symbol can be done
                 let isCorrect = false;
                 if(currentMode === 'CTE') {
-                    // Check English Symbol case insensitively or strictly? Chemical symbols usually case sensitive. Let's do case insensitive for user convenience but show exact case on error.
                     isCorrect = userVal.toLowerCase() === correctVal.toLowerCase();
                 } else {
                     isCorrect = userVal === correctVal;
@@ -521,7 +530,6 @@
                 if(isCorrect) {
                     correctCount++;
                     block.className = "cell correct-bg";
-                    // Display correct format beautifully
                     block.innerHTML = `
                         <span class="atomic-number">${id}</span>
                         <span class="symbol-text" style="color:white; font-size:16px;">${elementsData[id].s}</span>
@@ -529,7 +537,6 @@
                     `;
                 } else {
                     block.className = "cell wrong-bg";
-                    // Render the original prompt element and then add the correct value below it matching the exact font specifications requested
                     input.style.display = "none";
                     if(label) label.style.display = "none";
                     
